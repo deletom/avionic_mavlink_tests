@@ -65,6 +65,10 @@ int main(void) {
         uint8_t buffer;
         mavlink_message_t message;
         mavlink_status_t status;
+        mavlink_heartbeat_t hearbeat;
+        mavlink_highres_imu_t imu;
+        mavlink_global_position_int_t packet;
+
         int msgReceived;
         int msgReadyToDecode;
 
@@ -75,50 +79,51 @@ int main(void) {
         }
 
         if (msgReadyToDecode) {
+            switch (message.msgid) {
+                case MAVLINK_MSG_ID_HEARTBEAT:
+                    mavlink_msg_heartbeat_decode(&message, &hearbeat);
 
-            mavlink_heartbeat_t hearbeat;
-            mavlink_msg_heartbeat_decode(&message, &hearbeat);
+                    printf("HEARTBEAT");
+                    printf("\t autopilot : %d \n ", hearbeat.autopilot);
+                    printf("\t base_mode : %d \n ", hearbeat.base_mode);
+                    printf("\t custom_mode: %d \n ", hearbeat.custom_mode);
+                    printf("\t mavlink_version : %d \n ", hearbeat.mavlink_version);
+                    printf("\t system_status : %d \n ", hearbeat.system_status);
+                    printf("\t type : %d \n ", hearbeat.type);
+                    printf("\n");
 
-            printf("HEARTBEAT");
-            printf("\t autopilot : %d \n ", hearbeat.autopilot);
-            printf("\t base_mode : %d \n ", hearbeat.base_mode);
-            printf("\t custom_mode: %d \n ", hearbeat.custom_mode);
-            printf("\t mavlink_version : %d \n ", hearbeat.mavlink_version);
-            printf("\t system_status : %d \n ", hearbeat.system_status);
-            printf("\t type : %d \n ", hearbeat.type);
-            printf("\n");
+                    break;
 
-            /*switch (message.msgid) {
                 case MAVLINK_MSG_ID_HIGHRES_IMU:
-                {
-                    mavlink_highres_imu_t imu;
                     mavlink_msg_highres_imu_decode(&message, &imu);
 
-                    printf("Got message HIGHRES_IMU");
-                    printf("\t time: %llu\n", imu.time_usec);
-                    printf("\t acc  (NED):\t% f\t% f\t% f (m/s^2)\n", imu.xacc, imu.yacc, imu.zacc);
-                    printf("\t gyro (NED):\t% f\t% f\t% f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
-                    printf("\t mag  (NED):\t% f\t% f\t% f (Ga)\n", imu.xmag, imu.ymag, imu.zmag);
+                    printf("IMU");
+                    printf("\t acc:\t% f\t% f\t% f (m/s^2)\n", imu.xacc, imu.yacc, imu.zacc);
+                    printf("\t gyro:\t% f\t% f\t% f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
+                    printf("\t mag:\t% f\t% f\t% f (Ga)\n", imu.xmag, imu.ymag, imu.zmag);
                     printf("\t baro: \t %f (mBar)\n", imu.abs_pressure);
                     printf("\t altitude: \t %f (m)\n", imu.pressure_alt);
                     printf("\t temperature: \t %f C\n", imu.temperature);
                     printf("\n");
-                }
+
+                    break;
+                    
+                case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
+                    mavlink_msg_global_position_int_decode(&message, &packet);
+                    
+                    printf("POSITION");
+                    printf("\t lat:\t %d \n", packet.lat);
+                    printf("\t lon:\t %d \n", packet.lon);
+                    
                     break;
 
-                case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
-                {
-                    mavlink_global_position_int_t packet;
-                    mavlink_msg_global_position_int_decode(&message, &packet);
-                    printf("eccolo!! %d %d %d %d\n", packet.time_boot_ms, packet.lat, packet.lon, packet.hdg);
-                }
+                default:
+                    printf("pas d equivalence : %d", message.msgid);
                     break;
-            }*/
+
+            }
         }
     }
-
-
-
     return EXIT_SUCCESS;
 }
 
