@@ -19,6 +19,7 @@ int main(void) {
 
     struct termios toptions;
     int openSerial;
+    int counterReceive = 0;
 
     openSerial = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
 
@@ -61,14 +62,9 @@ int main(void) {
     }
 
     while (1) {
-
         uint8_t buffer;
         mavlink_message_t message;
         mavlink_status_t status;
-        mavlink_heartbeat_t hearbeat;
-        mavlink_highres_imu_t imu;
-        mavlink_global_position_int_t packet;
-
         int msgReceived;
         int msgReadyToDecode;
 
@@ -78,12 +74,17 @@ int main(void) {
             msgReadyToDecode = mavlink_parse_char(MAVLINK_COMM_1, buffer, &message, &status);
         }
 
-        if (msgReadyToDecode) {
+        if (msgReadyToDecode) { 
+            
+            mavlink_highres_imu_t imu;
+            mavlink_gps_raw_int_t position;            
+            mavlink_heartbeat_t hearbeat;
+            
             switch (message.msgid) {
                 case MAVLINK_MSG_ID_HEARTBEAT:
                     mavlink_msg_heartbeat_decode(&message, &hearbeat);
 
-                    printf("HEARTBEAT");
+                    printf("HEARTBEAT \n");
                     printf("\t autopilot : %d \n ", hearbeat.autopilot);
                     printf("\t base_mode : %d \n ", hearbeat.base_mode);
                     printf("\t custom_mode: %d \n ", hearbeat.custom_mode);
@@ -94,10 +95,10 @@ int main(void) {
 
                     break;
 
-                case MAVLINK_MSG_ID_HIGHRES_IMU:
+                case MAVLINK_MSG_ID_ATTITUDE:
                     mavlink_msg_highres_imu_decode(&message, &imu);
 
-                    printf("IMU");
+                    printf("IMU \n");
                     printf("\t acc:\t% f\t% f\t% f (m/s^2)\n", imu.xacc, imu.yacc, imu.zacc);
                     printf("\t gyro:\t% f\t% f\t% f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
                     printf("\t mag:\t% f\t% f\t% f (Ga)\n", imu.xmag, imu.ymag, imu.zmag);
@@ -108,20 +109,18 @@ int main(void) {
 
                     break;
                     
-                case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
-                    mavlink_msg_global_position_int_decode(&message, &packet);
+                case MAVLINK_MSG_ID_GPS_RAW_INT:
+                    mavlink_msg_gps_raw_int_decode(&message, &position);
                     
-                    printf("POSITION");
-                    printf("\t lat:\t %d \n", packet.lat);
-                    printf("\t lon:\t %d \n", packet.lon);
+                    printf("POSITION \n");
+                    printf("\t lat:\t %d \n", position.lat);
+                    printf("\t lon:\t %d \n", position.lon);
                     
                     break;
-
                 default:
-                    printf("pas d equivalence : %d", message.msgid);
-                    break;
-
+                    printf("PB EQUIV : %d \n", message.msgid);
             }
+            counterReceive = counterReceive +1;
         }
     }
     return EXIT_SUCCESS;
