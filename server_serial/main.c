@@ -83,39 +83,20 @@ int main(void) {
             switch (message.msgid) {
                 case MAVLINK_MSG_ID_HEARTBEAT:
                     mavlink_msg_heartbeat_decode(&message, &hearbeat);
-
-                    printf("HEARTBEAT \n");
-                    printf("\t autopilot : %d \n ", hearbeat.autopilot);
-                    printf("\t base_mode : %d \n ", hearbeat.base_mode);
-                    printf("\t custom_mode: %d \n ", hearbeat.custom_mode);
-                    printf("\t mavlink_version : %d \n ", hearbeat.mavlink_version);
-                    printf("\t system_status : %d \n ", hearbeat.system_status);
-                    printf("\t type : %d \n ", hearbeat.type);
-                    printf("\n");
-
+                    printf("HEARTBEAT :  %d,%d \n", hearbeat.type, hearbeat.autopilot);
+                    fflush(stdout);
                     break;
 
                 case MAVLINK_MSG_ID_ATTITUDE:
                     mavlink_msg_highres_imu_decode(&message, &imu);
-
-                    printf("IMU \n");
-                    printf("\t acc:\t% f\t% f\t% f (m/s^2)\n", imu.xacc, imu.yacc, imu.zacc);
-                    printf("\t gyro:\t% f\t% f\t% f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
-                    printf("\t mag:\t% f\t% f\t% f (Ga)\n", imu.xmag, imu.ymag, imu.zmag);
-                    printf("\t baro: \t %f (mBar)\n", imu.abs_pressure);
-                    printf("\t altitude: \t %f (m)\n", imu.pressure_alt);
-                    printf("\t temperature: \t %f C\n", imu.temperature);
-                    printf("\n");
-
+                    printf("IMU :  %f,%f,%f,%f \n", imu.xgyro, imu.ygyro, imu.zgyro,imu.pressure_alt);
+                    fflush(stdout);
                     break;
                     
                 case MAVLINK_MSG_ID_GPS_RAW_INT:
                     mavlink_msg_gps_raw_int_decode(&message, &position);
-                    
-                    printf("POSITION \n");
-                    printf("\t lat:\t %d \n", position.lat);
-                    printf("\t lon:\t %d \n", position.lon);
-                    
+                    printf("POSITION :  %d,%d \n", position.lat, position.lon);
+                    fflush(stdout);                    
                     break;
                 default:
                     printf("PB EQUIV : %d \n", message.msgid);
